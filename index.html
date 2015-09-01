@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <h1>Hello World!</h1>
+    We are using io.js <script>document.write(process.version)</script>
+    and Electron <script>document.write(process.versions['electron'])</script>.
+    <hr>
+    <script>
+        for (propName in process.versions) {
+            document.write(propName + ' : ' + process.versions[propName]);
+            document.write('<br>');
+        }
+    </script>
+</body>
+</html>
