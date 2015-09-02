@@ -1,9 +1,63 @@
 // main.js
 
-console.log(process.argv);
+/**
+ * getMarkdownPath
+ * @param argv
+ */
+function getMarkdownPath(argv) {
+    console.log('getMarkdownPath: ' + argv);
 
+    var pattern = /(--mdpath=)(["']?)(.+)/i;
+
+    for (i = 0; i < argv.length; i++) {
+        //console.log(argv[i] + '\r\n');
+
+        var matchs = argv[i].match(pattern);
+        if (matchs) {
+            console.log('matchs: ' + matchs[3] + '\r\n');
+            var path = matchs[3];
+            // remove the closure " or ' char
+            if (path.length > 0 && matchs[2].length > 0 && path.charAt(path.length-1) === matchs[2]) {
+                path = path.slice(0, path.length - 1);
+            }
+
+            return path;
+        }
+    }
+
+    return "<none>";
+}
+
+/**
+ * translateMdfile
+ * @param filename
+ */
+function translateMdfile(filename) {
+    console.log('translateMdfile: ' + filename);
+
+    fs.readFile(filename, function (error, data) {
+        if (error) throw error;
+
+        console.log(typeof data);
+        var marked = require('marked');
+        marked(data.toString(), function (err, content) {
+            if (err) {
+                console.log('marked error, data: \r\n' + data + '\r\n' + 'content:' + '\r\n' + content);
+                throw err;
+            }
+
+            fs.writeFile(__dirname + '/' + resultfile, content, function (e) {
+                if (e) throw e;
+
+                if (mainWindow) mainWindow.loadUrl('file://' + __dirname + '/' + resultfile);
+            })
+        })
+    })
+}
+
+//-----------------------------------------------------
 var resultfile = 'translated.html';
-var mdpath = '.\\readme.md';//process.argv[2];
+var mdpath = getMarkdownPath(process.argv);
 
 var fs = require('fs');
 
@@ -19,25 +73,7 @@ else {
     });
 
     watcher.on('change', function (event, filename) {
-        fs.readFile(filename, function (error, data) {
-            if (error) throw error;
-
-            console.log(typeof data);
-            var marked = require('marked');
-            marked(data.toString(), function (err, content) {
-                if (err) {
-                    console.log('marked error, data: \r\n' + data + '\r\n' + 'content:' + '\r\n' + content);
-                    throw err;
-                }
-
-                fs.writeFile(__dirname + '/' + resultfile, content, function (e) {
-                    if (e) throw e;
-
-                    if (mainWindow) mainWindow.loadUrl('file://' + __dirname + '/' + resultfile);
-                })
-            })
-        })
-
+        translateMdfile(mdpath);
     });
 
     watcher.on('error', function (err) {
@@ -70,6 +106,8 @@ app.on('ready', function() {
     // Create the browser window.
     mainWindow = new BrowserWindow({width: 800, height: 600});
 
+    translateMdfile(mdpath);
+
     // and load the index.html of the app.
     mainWindow.loadUrl('file://' + __dirname + '/' + resultfile);
 
@@ -86,6 +124,7 @@ app.on('ready', function() {
 
 
 });
+
 
 ///
 /*
