@@ -30,15 +30,14 @@ function getMarkdownPath(argv) {
 
 /**
  * translateMdfile
- * @param filename
+ * @param filepath
  */
-function translateMdfile(filename) {
-    console.log('translateMdfile: ' + filename);
+function translateMdfile(filepath) {
+    console.log('translateMdfile: ' + filepath);
 
-    fs.readFile(filename, function (error, data) {
+    fs.readFile(filepath, function (error, data) {
         if (error) throw error;
 
-        console.log(typeof data);
         var marked = require('marked');
         marked(data.toString(), function (err, content) {
             if (err) {
